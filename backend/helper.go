@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 
@@ -89,6 +90,7 @@ func addSalaryCredited(context *gin.Context) {
 	autoInvestmentPlan.ID = newSalary.ID
 	autoInvestmentPlan.Year = newSalary.Year
 	autoInvestmentPlan.SalaryCredited = newSalary.SalaryCredited
+	autoInvestmentPlan.Month = newSalary.Month
 	autoInvestmentPlan.Saving = saving
 	autoInvestmentPlan.MutualFund = mutualFund
 	autoInvestmentPlan.Reits = reits
@@ -98,6 +100,7 @@ func addSalaryCredited(context *gin.Context) {
 	autoInvestmentPlan.FutureSecurity = futureSecurity
 	autoInvestmentPlan.HouseGroceries = houseGroceries
 	autoInvestmentPlan.SelfExpenses = selfExpenses
+	autoInvestmentPlan.UniqueId = rand.Int31()
 
 	customerOne = append(customerOne, autoInvestmentPlan)
 	context.IndentedJSON(http.StatusOK, autoInvestmentPlan)
@@ -120,6 +123,7 @@ func updateSingleCustomerInformation(context *gin.Context) {
 	newSalary.ID = getInfo.ID
 	newSalary.Year = getInfo.Year
 	newSalary.SalaryCredited = getInfo.SalaryCredited
+	newSalary.Month = getInfo.Month
 	newSalary.Saving = getInfo.Saving
 	newSalary.MutualFund = getInfo.MutualFund
 	newSalary.Reits = getInfo.Reits
@@ -130,6 +134,7 @@ func updateSingleCustomerInformation(context *gin.Context) {
 	newSalary.HouseGroceries = getInfo.HouseGroceries
 	newSalary.SelfExpenses = getInfo.SelfExpenses
 	newSalary.UnspentMoney = getInfo.UnspentMoney
+	newSalary.UniqueId = getInfo.UniqueId
 
 	context.IndentedJSON(http.StatusCreated, newSalary)
 }
