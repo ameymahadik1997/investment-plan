@@ -5,6 +5,7 @@ type investmentAutoCalculator struct {
 	Year           string  `json:"year"`
 	Month          string  `json:"month"`
 	SalaryCredited float64 `json:"salary_credited"`
+	UniqueId       int32   `json:"unique_id"`
 }
 
 type investmentOutput struct {

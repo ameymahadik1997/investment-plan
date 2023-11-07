@@ -114,7 +114,12 @@ func addSalaryCredited(context *gin.Context) {
 	autoInvestmentPlan.FutureSecurity = futureSecurity
 	autoInvestmentPlan.HouseGroceries = houseGroceries
 	autoInvestmentPlan.SelfExpenses = selfExpenses
-	autoInvestmentPlan.UniqueId = rand.Int31()
+	if newSalary.UniqueId != 0 {
+		autoInvestmentPlan.UniqueId = newSalary.UniqueId
+
+	} else {
+		autoInvestmentPlan.UniqueId = rand.Int31()
+	}
 
 	customerOne = append(customerOne, autoInvestmentPlan)
 	context.IndentedJSON(http.StatusOK, autoInvestmentPlan)
