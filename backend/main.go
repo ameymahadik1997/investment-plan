@@ -21,3 +21,5 @@ type investmentOutput struct {
 	SelfExpenses     float64 `json:"self_expense"`
 	UnspentMoney     float64 `json:"unspent_money"`
 }
+
+type Dictionary map[string]interface{}
