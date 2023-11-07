@@ -8,7 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type investmentCalculator struct {
+type investmentAutoCalculator struct {
+	ID             int     `json:"id"`
+	Year           string  `json:"year"`
+	SalaryCredited float64 `json:"salary_credited"`
+}
+
+type investmentOutput struct {
 	ID               int     `json:"id"`
 	Year             string  `json:"year"`
 	SalaryCredited   float64 `json:"salary_credited"`
@@ -24,7 +30,7 @@ type investmentCalculator struct {
 	UnspentMoney     float64 `json:"unspent_money"`
 }
 
-var customerOne = []investmentCalculator{
+var customerOne = []investmentOutput{
 	{
 		ID:               1,
 		Year:             "2023",
@@ -47,7 +53,7 @@ func getCustomerInformation(context *gin.Context) {
 }
 
 func addInvestmentInformation(context *gin.Context) {
-	var newInvestment investmentCalculator
+	var newInvestment investmentOutput
 
 	if err := context.BindJSON(&newInvestment); err != nil {
 		return
@@ -58,7 +64,7 @@ func addInvestmentInformation(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, newInvestment)
 }
 
-func getSingleCustomerInformationById(id string) (*investmentCalculator, error) {
+func getSingleCustomerInformationById(id string) (*investmentOutput, error) {
 	idConvert, _ := stringToInt(id)
 	for index, investmentCalculatorId := range customerOne {
 		if investmentCalculatorId.ID == idConvert {
@@ -86,10 +92,21 @@ func stringToInt(stringNumber string) (int, error) {
 	return num, nil
 }
 
+func addSalaryCredited(context *gin.Context) {
+	var newSalary investmentAutoCalculator
+
+	if err := context.BindJSON(&newSalary); err != nil {
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, newSalary)
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/customer-information", getCustomerInformation)
 	router.POST("/customer-information", addInvestmentInformation)
+	router.POST("/customer-information-salary", addSalaryCredited)
 	router.GET("/customer-information/:id", getSingleCustomerInformation)
 	router.Run("localhost:9090")
 }
