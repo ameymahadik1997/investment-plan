@@ -102,3 +102,34 @@ func addSalaryCredited(context *gin.Context) {
 	customerOne = append(customerOne, autoInvestmentPlan)
 	context.IndentedJSON(http.StatusOK, autoInvestmentPlan)
 }
+
+func updateSingleCustomerInformation(context *gin.Context) {
+	var newSalary investmentOutput
+
+	id := context.Param("id")
+	getInfo, err := getSingleCustomerInformationById(id)
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
+		return
+	}
+
+	if err := context.BindJSON(&getInfo); err != nil {
+		return
+	}
+
+	newSalary.ID = getInfo.ID
+	newSalary.Year = getInfo.Year
+	newSalary.SalaryCredited = getInfo.SalaryCredited
+	newSalary.Saving = getInfo.Saving
+	newSalary.MutualFund = getInfo.MutualFund
+	newSalary.Reits = getInfo.Reits
+	newSalary.IndependentShare = getInfo.IndependentShare
+	newSalary.Gold = getInfo.Gold
+	newSalary.RecurringDep = getInfo.RecurringDep
+	newSalary.FutureSecurity = getInfo.FutureSecurity
+	newSalary.HouseGroceries = getInfo.HouseGroceries
+	newSalary.SelfExpenses = getInfo.SelfExpenses
+	newSalary.UnspentMoney = getInfo.UnspentMoney
+
+	context.IndentedJSON(http.StatusCreated, newSalary)
+}

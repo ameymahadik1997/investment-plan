@@ -8,5 +8,6 @@ func main() {
 	router.POST("/customer-information", addInvestmentInformation)
 	router.POST("/customer-information-salary", addSalaryCredited)
 	router.GET("/customer-information/:id", getSingleCustomerInformation)
+	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.Run("localhost:9090")
 }
