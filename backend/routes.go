@@ -10,5 +10,6 @@ func main() {
 	router.GET("/customer-information/:id", getSingleCustomerInformation)
 	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
+	router.GET("/customer-information-all/:unique_id", getAllInformationViaUniqueId)
 	router.Run("localhost:9090")
 }
