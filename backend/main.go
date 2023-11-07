@@ -137,6 +137,7 @@ func addSalaryCredited(context *gin.Context) {
 	autoInvestmentPlan.HouseGroceries = houseGroceries
 	autoInvestmentPlan.SelfExpenses = selfExpenses
 
+	customerOne = append(customerOne, autoInvestmentPlan)
 	context.IndentedJSON(http.StatusOK, autoInvestmentPlan)
 }
 
