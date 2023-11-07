@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,9 +58,38 @@ func addInvestmentInformation(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, newInvestment)
 }
 
+func getSingleCustomerInformationById(id string) (*investmentCalculator, error) {
+	idConvert, _ := stringToInt(id)
+	for index, investmentCalculatorId := range customerOne {
+		if investmentCalculatorId.ID == idConvert {
+			return &customerOne[index], nil
+		}
+	}
+	return nil, errors.New("Investment Information not found!")
+}
+
+func getSingleCustomerInformation(context *gin.Context) {
+	id := context.Param("id")
+	getInfo, err := getSingleCustomerInformationById(id)
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
+		return
+	}
+	context.IndentedJSON(http.StatusOK, getInfo)
+}
+
+func stringToInt(stringNumber string) (int, error) {
+	num, err := strconv.Atoi(stringNumber)
+	if err != nil {
+		return 0, err
+	}
+	return num, nil
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/customer-information", getCustomerInformation)
 	router.POST("/customer-information", addInvestmentInformation)
+	router.GET("/customer-information/:id", getSingleCustomerInformation)
 	router.Run("localhost:9090")
 }
