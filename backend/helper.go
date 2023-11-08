@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -252,13 +251,8 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 
 func getAllUsers(context *gin.Context) {
 	// MySQL connection
-	currentDir, err := os.Getwd()
-	if err != nil {
-		// Handle the error
-	}
-	fmt.Println("Current working directory:", currentDir)
-	viper.SetConfigFile("/backend/config/keys.json")
-	err = viper.ReadInConfig()
+	viper.SetConfigFile("keys.json")
+	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
