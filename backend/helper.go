@@ -14,11 +14,32 @@ import (
 	"github.com/spf13/viper"
 )
 
-var customerOne = []investmentOutput{}
+// Function to connect to the DB
+func dbConnect() *sql.DB {
+	// MySQL connection
+	viper.SetConfigFile("keys.json")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func getCustomerInformation(context *gin.Context) {
-	context.IndentedJSON(http.StatusOK, customerOne)
+	dbUsername := viper.GetString("DB_USERNAME")
+	dbPassword := viper.GetString("DB_PASSWORD")
+	dbHost := viper.GetString("DB_HOST")
+	dbPort := viper.GetString("DB_PORT")
+	dbName := viper.GetString("DB_NAME")
+
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbHost, dbPort, dbName)
+
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Fatal("Error connecting to database")
+	}
+
+	return db
 }
+
+var customerOne = []investmentOutput{}
 
 func addInvestmentInformation(context *gin.Context) {
 	var newInvestment investmentOutput
@@ -249,29 +270,8 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, getInfo)
 }
 
-func getAllUsers(context *gin.Context) {
-	// MySQL connection
-	viper.SetConfigFile("keys.json")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dbUsername := viper.GetString("DB_USERNAME")
-	dbPassword := viper.GetString("DB_PASSWORD")
-	dbHost := viper.GetString("DB_HOST")
-	dbPort := viper.GetString("DB_PORT")
-	dbName := viper.GetString("DB_NAME")
-
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbHost, dbPort, dbName)
-
-	db, err := sql.Open("mysql", dataSourceName)
-	if err != nil {
-		log.Fatal("Error connecting to database")
-	}
-
-	// Logging the Outputs
-	fmt.Printf("Connection Successful")
+func getCustomerInformation(context *gin.Context) {
+	db := dbConnect()
 
 	var users []investmentOutput
 	rows, err := db.Query("SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money FROM investment_output;")

@@ -4,7 +4,6 @@ import "github.com/gin-gonic/gin"
 
 func main() {
 	router := gin.Default()
-	router.GET("/customer-information", getCustomerInformation)
 	router.POST("/customer-information", addInvestmentInformation)
 	router.POST("/customer-information-salary", addSalaryCredited)
 	router.GET("/customer-information/:id", getSingleCustomerInformation)
@@ -12,6 +11,6 @@ func main() {
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
 	router.GET("/customer-information-all/:unique_id", getAllInformationViaUniqueId)
 	// Database APIs
-	router.GET("/get-all-users", getAllUsers)
+	router.GET("/get-all-users", getCustomerInformation)
 	router.Run("localhost:9090")
 }
