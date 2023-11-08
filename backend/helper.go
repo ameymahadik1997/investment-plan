@@ -114,6 +114,8 @@ func addSalaryCredited(context *gin.Context) {
 	fmt.Printf("HouseGroceries: %v\n", houseGroceries)
 	fmt.Printf("SelfExpenses: %v\n", selfExpenses)
 
+	db := dbConnect()
+
 	autoInvestmentPlan.ID = newSalary.ID
 	autoInvestmentPlan.Year = newSalary.Year
 	autoInvestmentPlan.SalaryCredited = newSalary.SalaryCredited
@@ -134,8 +136,19 @@ func addSalaryCredited(context *gin.Context) {
 		autoInvestmentPlan.UniqueId = rand.Int31()
 	}
 
-	customerOne = append(customerOne, autoInvestmentPlan)
-	context.IndentedJSON(http.StatusOK, autoInvestmentPlan)
+	stmt, err := db.Prepare("INSERT INTO investment_output (year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(autoInvestmentPlan.Year, autoInvestmentPlan.Month, autoInvestmentPlan.SalaryCredited, autoInvestmentPlan.Saving, autoInvestmentPlan.MutualFund, autoInvestmentPlan.Reits, autoInvestmentPlan.IndependentShare, autoInvestmentPlan.RecurringDep, autoInvestmentPlan.Gold, autoInvestmentPlan.FutureSecurity, autoInvestmentPlan.HouseGroceries, autoInvestmentPlan.SelfExpenses, autoInvestmentPlan.UnspentMoney)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.Close()
+	context.IndentedJSON(http.StatusCreated, gin.H{"Message": "Information Added"})
 }
 
 func updateSingleCustomerInformation(context *gin.Context) {

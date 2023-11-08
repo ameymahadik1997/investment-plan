@@ -5,7 +5,7 @@ import "github.com/gin-gonic/gin"
 func main() {
 	router := gin.Default()
 
-	router.POST("/customer-information-salary", addSalaryCredited)
+	router.POST("/add-new-user-automated-invest", addSalaryCredited)
 	router.GET("/customer-information/:id", getSingleCustomerInformation)
 	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
