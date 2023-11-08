@@ -7,10 +7,12 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 )
 
 var customerOne = []investmentOutput{}
@@ -249,25 +251,23 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 }
 
 func getAllUsers(context *gin.Context) {
-
-	fmt.Printf("Username")
 	// MySQL connection
-	// err := godotenv.Load("keys.env")
-	// if err != nil {
-	// 	log.Fatalf("Error loading .env file: %v", err)
-	// }
+	currentDir, err := os.Getwd()
+	if err != nil {
+		// Handle the error
+	}
+	fmt.Println("Current working directory:", currentDir)
+	viper.SetConfigFile("/backend/config/keys.json")
+	err = viper.ReadInConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// dbUsername := os.Getenv("DB_USERNAME")
-	// dbPassword := os.Getenv("DB_PASSWORD")
-	// dbHost := os.Getenv("DB_HOST")
-	// dbPort := os.Getenv("DB_PORT")
-	// dbName := os.Getenv("DB_NAME")
-
-	dbUsername := "root"
-	dbPassword := "Anju@2508"
-	dbHost := "127.0.0.1"
-	dbPort := "3306"
-	dbName := "investulator"
+	dbUsername := viper.GetString("DB_USERNAME")
+	dbPassword := viper.GetString("DB_PASSWORD")
+	dbHost := viper.GetString("DB_HOST")
+	dbPort := viper.GetString("DB_PORT")
+	dbName := viper.GetString("DB_NAME")
 
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbHost, dbPort, dbName)
 
