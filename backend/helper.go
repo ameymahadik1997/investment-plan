@@ -83,74 +83,6 @@ func stringToInt(stringNumber string) (int, error) {
 	return num, nil
 }
 
-func addSalaryCredited(context *gin.Context) {
-	var newSalary investmentAutoCalculator
-	var autoInvestmentPlan investmentOutput
-
-	if err := context.BindJSON(&newSalary); err != nil {
-		return
-	}
-
-	salaryCredited := newSalary.SalaryCredited
-	saving := newSalary.SalaryCredited * 0.20
-	mutualFund := newSalary.SalaryCredited * 0.10
-	reits := newSalary.SalaryCredited * 0.05
-	share := newSalary.SalaryCredited * 0.05
-	gold := newSalary.SalaryCredited * 0.02
-	recurringDeposit := newSalary.SalaryCredited * 0.05
-	futureSecurity := newSalary.SalaryCredited * 0.09
-	houseGroceries := newSalary.SalaryCredited * 0.30
-	selfExpenses := newSalary.SalaryCredited * 0.20
-
-	// Logging the Outputs
-	fmt.Printf("SalaryCredited: %v\n", salaryCredited)
-	fmt.Printf("Saving: %v\n", saving)
-	fmt.Printf("MutualFund: %v\n", mutualFund)
-	fmt.Printf("Reits: %v\n", reits)
-	fmt.Printf("Share: %v\n", share)
-	fmt.Printf("Gold: %v\n", gold)
-	fmt.Printf("RecurringDeposit: %v\n", recurringDeposit)
-	fmt.Printf("FutureSecurity: %v\n", futureSecurity)
-	fmt.Printf("HouseGroceries: %v\n", houseGroceries)
-	fmt.Printf("SelfExpenses: %v\n", selfExpenses)
-
-	db := dbConnect()
-
-	autoInvestmentPlan.ID = newSalary.ID
-	autoInvestmentPlan.Year = newSalary.Year
-	autoInvestmentPlan.SalaryCredited = newSalary.SalaryCredited
-	autoInvestmentPlan.Month = newSalary.Month
-	autoInvestmentPlan.Saving = saving
-	autoInvestmentPlan.MutualFund = mutualFund
-	autoInvestmentPlan.Reits = reits
-	autoInvestmentPlan.IndependentShare = share
-	autoInvestmentPlan.Gold = gold
-	autoInvestmentPlan.RecurringDep = recurringDeposit
-	autoInvestmentPlan.FutureSecurity = futureSecurity
-	autoInvestmentPlan.HouseGroceries = houseGroceries
-	autoInvestmentPlan.SelfExpenses = selfExpenses
-	if newSalary.UniqueId != 0 {
-		autoInvestmentPlan.UniqueId = newSalary.UniqueId
-
-	} else {
-		autoInvestmentPlan.UniqueId = rand.Int31()
-	}
-
-	stmt, err := db.Prepare("INSERT INTO investment_output (year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(autoInvestmentPlan.Year, autoInvestmentPlan.Month, autoInvestmentPlan.SalaryCredited, autoInvestmentPlan.Saving, autoInvestmentPlan.MutualFund, autoInvestmentPlan.Reits, autoInvestmentPlan.IndependentShare, autoInvestmentPlan.RecurringDep, autoInvestmentPlan.Gold, autoInvestmentPlan.FutureSecurity, autoInvestmentPlan.HouseGroceries, autoInvestmentPlan.SelfExpenses, autoInvestmentPlan.UnspentMoney)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.Close()
-	context.IndentedJSON(http.StatusCreated, gin.H{"Message": "Information Added"})
-}
-
 func updateSingleCustomerInformation(context *gin.Context) {
 	var newSalary investmentOutput
 
@@ -273,6 +205,7 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 
 // Database API Calls
 
+// Function GET API to get all the Customer List
 func getCustomerInformation(context *gin.Context) {
 	db := dbConnect()
 
@@ -295,4 +228,73 @@ func getCustomerInformation(context *gin.Context) {
 	defer db.Close()
 
 	context.IndentedJSON(http.StatusOK, users)
+}
+
+// Function POST API to add the data for customer automatedly
+func addSalaryCredited(context *gin.Context) {
+	var newSalary investmentAutoCalculator
+	var autoInvestmentPlan investmentOutput
+
+	if err := context.BindJSON(&newSalary); err != nil {
+		return
+	}
+
+	salaryCredited := newSalary.SalaryCredited
+	saving := newSalary.SalaryCredited * 0.20
+	mutualFund := newSalary.SalaryCredited * 0.10
+	reits := newSalary.SalaryCredited * 0.05
+	share := newSalary.SalaryCredited * 0.05
+	gold := newSalary.SalaryCredited * 0.02
+	recurringDeposit := newSalary.SalaryCredited * 0.05
+	futureSecurity := newSalary.SalaryCredited * 0.09
+	houseGroceries := newSalary.SalaryCredited * 0.30
+	selfExpenses := newSalary.SalaryCredited * 0.20
+
+	// Logging the Outputs
+	fmt.Printf("SalaryCredited: %v\n", salaryCredited)
+	fmt.Printf("Saving: %v\n", saving)
+	fmt.Printf("MutualFund: %v\n", mutualFund)
+	fmt.Printf("Reits: %v\n", reits)
+	fmt.Printf("Share: %v\n", share)
+	fmt.Printf("Gold: %v\n", gold)
+	fmt.Printf("RecurringDeposit: %v\n", recurringDeposit)
+	fmt.Printf("FutureSecurity: %v\n", futureSecurity)
+	fmt.Printf("HouseGroceries: %v\n", houseGroceries)
+	fmt.Printf("SelfExpenses: %v\n", selfExpenses)
+
+	db := dbConnect()
+
+	autoInvestmentPlan.ID = newSalary.ID
+	autoInvestmentPlan.Year = newSalary.Year
+	autoInvestmentPlan.SalaryCredited = newSalary.SalaryCredited
+	autoInvestmentPlan.Month = newSalary.Month
+	autoInvestmentPlan.Saving = saving
+	autoInvestmentPlan.MutualFund = mutualFund
+	autoInvestmentPlan.Reits = reits
+	autoInvestmentPlan.IndependentShare = share
+	autoInvestmentPlan.Gold = gold
+	autoInvestmentPlan.RecurringDep = recurringDeposit
+	autoInvestmentPlan.FutureSecurity = futureSecurity
+	autoInvestmentPlan.HouseGroceries = houseGroceries
+	autoInvestmentPlan.SelfExpenses = selfExpenses
+	if newSalary.UniqueId != 0 {
+		autoInvestmentPlan.UniqueId = newSalary.UniqueId
+
+	} else {
+		autoInvestmentPlan.UniqueId = rand.Int31()
+	}
+
+	stmt, err := db.Prepare("INSERT INTO investment_output (year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(autoInvestmentPlan.Year, autoInvestmentPlan.Month, autoInvestmentPlan.SalaryCredited, autoInvestmentPlan.Saving, autoInvestmentPlan.MutualFund, autoInvestmentPlan.Reits, autoInvestmentPlan.IndependentShare, autoInvestmentPlan.RecurringDep, autoInvestmentPlan.Gold, autoInvestmentPlan.FutureSecurity, autoInvestmentPlan.HouseGroceries, autoInvestmentPlan.SelfExpenses, autoInvestmentPlan.UnspentMoney)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.Close()
+	context.IndentedJSON(http.StatusCreated, gin.H{"Message": "Information Added"})
 }
