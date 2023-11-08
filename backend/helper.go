@@ -51,20 +51,6 @@ func getSingleCustomerInformationById(id string) (*investmentOutput, error) {
 	return nil, errors.New("Investment Information not found!")
 }
 
-func getCustomerInformationByUniqueId(id string) ([]*investmentOutput, error) {
-	var resultArray []*investmentOutput // Change the type of resultArray to []*investmentOutput
-	uniqueIdConvert, _ := stringToInt(id)
-	for index, investmentCalculatorId := range customerOne {
-		if int(investmentCalculatorId.UniqueId) == uniqueIdConvert {
-			resultArray = append(resultArray, &customerOne[index])
-		}
-	}
-	if len(resultArray) == 0 {
-		return nil, errors.New("Investment Information not found!")
-	}
-	return resultArray, nil
-}
-
 func stringToInt(stringNumber string) (int, error) {
 	num, err := strconv.Atoi(stringNumber)
 	if err != nil {
@@ -183,16 +169,6 @@ func getFundStatusCheck(context *gin.Context) {
 	context.IndentedJSON(http.StatusAccepted, gin.H{"Result": resultArray})
 }
 
-func getAllInformationViaUniqueId(context *gin.Context) {
-	uniqueId := context.Param("unique_id")
-	getInfo, err := getCustomerInformationByUniqueId(uniqueId)
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
-		return
-	}
-	context.IndentedJSON(http.StatusOK, getInfo)
-}
-
 // Database API Calls
 
 // Function GET API to get all the Customer List
@@ -297,6 +273,32 @@ func getCustomerInformationById(context *gin.Context) {
 	id := context.Param("id")
 	query := "SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output WHERE id = ?;"
 	rows, err := db.Query(query, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user investmentOutput
+		err := rows.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, user)
+	}
+
+	defer db.Close()
+
+	context.IndentedJSON(http.StatusOK, users)
+}
+
+func getAllInformationViaUniqueId(context *gin.Context) {
+	db := dbConnect()
+
+	var users []investmentOutput
+	uniqueId := context.Param("unique_id")
+	query := "SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output WHERE unique_id = ?;"
+	rows, err := db.Query(query, uniqueId)
 	if err != nil {
 		log.Fatal(err)
 	}
