@@ -41,18 +41,6 @@ func dbConnect() *sql.DB {
 
 var customerOne = []investmentOutput{}
 
-func addInvestmentInformation(context *gin.Context) {
-	var newInvestment investmentOutput
-
-	if err := context.BindJSON(&newInvestment); err != nil {
-		return
-	}
-
-	customerOne = append(customerOne, newInvestment)
-
-	context.IndentedJSON(http.StatusCreated, newInvestment)
-}
-
 func getSingleCustomerInformationById(id string) (*investmentOutput, error) {
 	idConvert, _ := stringToInt(id)
 	for index, investmentCalculatorId := range customerOne {
@@ -269,6 +257,8 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 	}
 	context.IndentedJSON(http.StatusOK, getInfo)
 }
+
+// Database API Calls
 
 func getCustomerInformation(context *gin.Context) {
 	db := dbConnect()
