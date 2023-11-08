@@ -1,13 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var customerOne = []investmentOutput{}
@@ -243,4 +246,56 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 		return
 	}
 	context.IndentedJSON(http.StatusOK, getInfo)
+}
+
+func getAllUsers(context *gin.Context) {
+
+	fmt.Printf("Username")
+	// MySQL connection
+	// err := godotenv.Load("keys.env")
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file: %v", err)
+	// }
+
+	// dbUsername := os.Getenv("DB_USERNAME")
+	// dbPassword := os.Getenv("DB_PASSWORD")
+	// dbHost := os.Getenv("DB_HOST")
+	// dbPort := os.Getenv("DB_PORT")
+	// dbName := os.Getenv("DB_NAME")
+
+	dbUsername := "root"
+	dbPassword := "Anju@2508"
+	dbHost := "127.0.0.1"
+	dbPort := "3306"
+	dbName := "investulator"
+
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUsername, dbPassword, dbHost, dbPort, dbName)
+
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		log.Fatal("Error connecting to database")
+	}
+
+	// Logging the Outputs
+	fmt.Printf("Connection Successful")
+
+	var users []investmentOutput
+	rows, err := db.Query("SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money FROM investment_output;")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user investmentOutput
+		err := rows.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, user)
+	}
+
+	defer db.Close()
+
+	context.IndentedJSON(http.StatusOK, users)
 }

@@ -11,5 +11,7 @@ func main() {
 	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
 	router.GET("/customer-information-all/:unique_id", getAllInformationViaUniqueId)
+	// Database APIs
+	router.GET("/get-all-users", getAllUsers)
 	router.Run("localhost:9090")
 }
