@@ -65,16 +65,6 @@ func getCustomerInformationByUniqueId(id string) ([]*investmentOutput, error) {
 	return resultArray, nil
 }
 
-func getSingleCustomerInformation(context *gin.Context) {
-	id := context.Param("id")
-	getInfo, err := getSingleCustomerInformationById(id)
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
-		return
-	}
-	context.IndentedJSON(http.StatusOK, getInfo)
-}
-
 func stringToInt(stringNumber string) (int, error) {
 	num, err := strconv.Atoi(stringNumber)
 	if err != nil {
@@ -210,7 +200,7 @@ func getCustomerInformation(context *gin.Context) {
 	db := dbConnect()
 
 	var users []investmentOutput
-	rows, err := db.Query("SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money FROM investment_output;")
+	rows, err := db.Query("SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output;")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -218,7 +208,7 @@ func getCustomerInformation(context *gin.Context) {
 
 	for rows.Next() {
 		var user investmentOutput
-		err := rows.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney)
+		err := rows.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney, &user.UniqueId)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -284,17 +274,44 @@ func addSalaryCredited(context *gin.Context) {
 		autoInvestmentPlan.UniqueId = rand.Int31()
 	}
 
-	stmt, err := db.Prepare("INSERT INTO investment_output (year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO investment_output (year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(autoInvestmentPlan.Year, autoInvestmentPlan.Month, autoInvestmentPlan.SalaryCredited, autoInvestmentPlan.Saving, autoInvestmentPlan.MutualFund, autoInvestmentPlan.Reits, autoInvestmentPlan.IndependentShare, autoInvestmentPlan.RecurringDep, autoInvestmentPlan.Gold, autoInvestmentPlan.FutureSecurity, autoInvestmentPlan.HouseGroceries, autoInvestmentPlan.SelfExpenses, autoInvestmentPlan.UnspentMoney)
+	_, err = stmt.Exec(autoInvestmentPlan.Year, autoInvestmentPlan.Month, autoInvestmentPlan.SalaryCredited, autoInvestmentPlan.Saving, autoInvestmentPlan.MutualFund, autoInvestmentPlan.Reits, autoInvestmentPlan.IndependentShare, autoInvestmentPlan.RecurringDep, autoInvestmentPlan.Gold, autoInvestmentPlan.FutureSecurity, autoInvestmentPlan.HouseGroceries, autoInvestmentPlan.SelfExpenses, autoInvestmentPlan.UnspentMoney, autoInvestmentPlan.UniqueId)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	db.Close()
 	context.IndentedJSON(http.StatusCreated, gin.H{"Message": "Information Added"})
+}
+
+// Function to get the Information of the Customer From ID
+func getCustomerInformationById(context *gin.Context) {
+	db := dbConnect()
+
+	var users []investmentOutput
+	id := context.Param("id")
+	query := "SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output WHERE id = ?;"
+	rows, err := db.Query(query, id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user investmentOutput
+		err := rows.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, user)
+	}
+
+	defer db.Close()
+
+	context.IndentedJSON(http.StatusOK, users)
 }
