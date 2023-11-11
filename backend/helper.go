@@ -7,7 +7,9 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -57,39 +59,6 @@ func stringToInt(stringNumber string) (int, error) {
 		return 0, err
 	}
 	return num, nil
-}
-
-func updateSingleCustomerInformation(context *gin.Context) {
-	var newSalary investmentOutput
-
-	id := context.Param("id")
-	getInfo, err := getSingleCustomerInformationById(id)
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
-		return
-	}
-
-	if err := context.BindJSON(&getInfo); err != nil {
-		return
-	}
-
-	newSalary.ID = getInfo.ID
-	newSalary.Year = getInfo.Year
-	newSalary.SalaryCredited = getInfo.SalaryCredited
-	newSalary.Month = getInfo.Month
-	newSalary.Saving = getInfo.Saving
-	newSalary.MutualFund = getInfo.MutualFund
-	newSalary.Reits = getInfo.Reits
-	newSalary.IndependentShare = getInfo.IndependentShare
-	newSalary.Gold = getInfo.Gold
-	newSalary.RecurringDep = getInfo.RecurringDep
-	newSalary.FutureSecurity = getInfo.FutureSecurity
-	newSalary.HouseGroceries = getInfo.HouseGroceries
-	newSalary.SelfExpenses = getInfo.SelfExpenses
-	newSalary.UnspentMoney = getInfo.UnspentMoney
-	newSalary.UniqueId = getInfo.UniqueId
-
-	context.IndentedJSON(http.StatusCreated, newSalary)
 }
 
 func getFundStatusCheck(context *gin.Context) {
@@ -274,7 +243,8 @@ func getCustomerInformationById(context *gin.Context) {
 	query := "SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output WHERE id = ?;"
 	rows, err := db.Query(query, id)
 	if err != nil {
-		log.Fatal(err)
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
 	}
 	defer rows.Close()
 
@@ -292,6 +262,7 @@ func getCustomerInformationById(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, users)
 }
 
+// Function to get All the Information of the Customer From there Unique Id
 func getAllInformationViaUniqueId(context *gin.Context) {
 	db := dbConnect()
 
@@ -316,4 +287,76 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 	defer db.Close()
 
 	context.IndentedJSON(http.StatusOK, users)
+}
+
+func updateSingleCustomerInformation(context *gin.Context) {
+	var getInfo investmentOutput
+	var newSalary investmentOutput
+
+	db := dbConnect()
+
+	paramId := context.Param("id")
+	query := fmt.Sprintf("SELECT * FROM investment_output WHERE id = %s;", paramId)
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	errString := fmt.Sprintf("Error: %s", err)
+
+	if strings.Contains(errString, "no rows in result set") {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	if err := context.BindJSON(&getInfo); err != nil {
+		return
+	}
+
+	fieldToColumn := map[string]string{
+		"Year":             "year",
+		"Month":            "month",
+		"SalaryCredited":   "salary_credited",
+		"Saving":           "saving",
+		"MutualFund":       "mutual_funds",
+		"Reits":            "reits",
+		"IndependentShare": "independent_share",
+		"RecurringDep":     "recurring_deposit",
+		"Gold":             "gold",
+		"FutureSecurity":   "future_security",
+		"HouseGroceries":   "house_groceries",
+		"SelfExpenses":     "self_expense",
+		"UnspentMoney":     "unspent_money",
+		"UniqueID":         "unique_id",
+	}
+
+	columnsToUpdate := make([]string, 0)
+
+	// Iterate through the fields and check for updates
+	for field, column := range fieldToColumn {
+		valueOne := reflect.ValueOf(getInfo).FieldByName(field)
+		valueTwo := reflect.ValueOf(newSalary).FieldByName(field)
+
+		if valueOne.IsValid() && valueTwo.IsValid() && valueOne.Interface() != valueTwo.Interface() {
+			if _, ok := valueOne.Interface().(string); ok {
+				columnsToUpdate = append(columnsToUpdate, fmt.Sprintf("%s = '%v'", column, valueOne.Interface()))
+			} else {
+				columnsToUpdate = append(columnsToUpdate, fmt.Sprintf("%s = %v", column, valueOne.Interface()))
+			}
+		}
+	}
+
+	if len(columnsToUpdate) == 0 {
+		context.IndentedJSON(http.StatusOK, gin.H{"Message": "No updates needed"})
+		return
+	}
+
+	// Construct the SQL update statement
+	query = fmt.Sprintf("UPDATE investment_output SET %s WHERE id = ?", strings.Join(columnsToUpdate, ", "))
+	_, err = db.Exec(query, paramId)
+
+	if err != nil {
+		log.Fatal(err)
+		context.IndentedJSON(http.StatusInternalServerError, gin.H{"Message": "Failed to update information"})
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, gin.H{"Message": "Information Updated Successfully."})
 }
