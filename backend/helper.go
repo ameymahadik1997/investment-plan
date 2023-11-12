@@ -61,83 +61,6 @@ func stringToInt(stringNumber string) (int, error) {
 	return num, nil
 }
 
-func getFundStatusCheck(context *gin.Context) {
-	var resultArray = []Dictionary{}
-	id := context.Param("id")
-	getInfo, err := getSingleCustomerInformationById(id)
-	if err != nil {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Information was not found!"})
-		return
-	}
-
-	if getInfo.FutureSecurity < getInfo.SalaryCredited*0.09 {
-		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.MutualFund < getInfo.SalaryCredited*0.10 {
-		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.Reits < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "Reits", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "Reits", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.IndependentShare < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.Gold < getInfo.SalaryCredited*0.02 {
-		newDict := Dictionary{"Fund": "Gold", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "Gold", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.RecurringDep < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.HouseGroceries < getInfo.SalaryCredited*0.30 {
-		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	if getInfo.SelfExpenses < getInfo.SalaryCredited*0.30 {
-		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-
-		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
-
-	context.IndentedJSON(http.StatusAccepted, gin.H{"Result": resultArray})
-}
-
 // Database API Calls
 
 // Function GET API to get all the Customer List
@@ -309,6 +232,7 @@ func getAllInformationViaUniqueId(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, users)
 }
 
+// Funtion to update the fields of the customer based on the ID input
 func updateSingleCustomerInformation(context *gin.Context) {
 	var getInfo investmentOutput
 	var newSalary investmentOutput
@@ -379,4 +303,99 @@ func updateSingleCustomerInformation(context *gin.Context) {
 	}
 
 	context.IndentedJSON(http.StatusOK, gin.H{"Message": "Information Updated Successfully."})
+}
+
+// Function to get the statuses of the customer's funds based on their ID input Parameter
+func getFundStatusCheck(context *gin.Context) {
+	db := dbConnect()
+	var resultArray = []Dictionary{}
+	paramId := context.Param("id")
+	query := fmt.Sprintf("SELECT * FROM investment_output WHERE id = %s;", paramId)
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	errString := fmt.Sprintf("Error: %s", err)
+
+	if strings.Contains(errString, "no rows in result set") {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	query = "SELECT id, year, month, salary_credited, saving, mutual_funds, reits, independent_share, recurring_deposit, gold, future_security, house_groceries, self_expense, unspent_money, unique_id FROM investment_output WHERE id = ?;"
+	getInfo, err := db.Query(query, paramId)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	defer getInfo.Close()
+
+	// Need to work around here for the looping and fetching information
+
+	if getInfo.FutureSecurity < getInfo.SalaryCredited*0.09 {
+		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.MutualFund < getInfo.SalaryCredited*0.10 {
+		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.Reits < getInfo.SalaryCredited*0.05 {
+		newDict := Dictionary{"Fund": "Reits", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "Reits", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.IndependentShare < getInfo.SalaryCredited*0.05 {
+		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.Gold < getInfo.SalaryCredited*0.02 {
+		newDict := Dictionary{"Fund": "Gold", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "Gold", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.RecurringDep < getInfo.SalaryCredited*0.05 {
+		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.HouseGroceries < getInfo.SalaryCredited*0.30 {
+		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	if getInfo.SelfExpenses < getInfo.SalaryCredited*0.30 {
+		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund Low", "Status": "Low"}
+		resultArray = append(resultArray, newDict)
+	} else {
+
+		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund High", "Status": "High"}
+		resultArray = append(resultArray, newDict)
+	}
+
+	defer db.Close()
+	context.IndentedJSON(http.StatusAccepted, gin.H{"Result": resultArray})
 }
