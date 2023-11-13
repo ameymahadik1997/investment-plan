@@ -308,7 +308,7 @@ func updateSingleCustomerInformation(context *gin.Context) {
 // Function to get the statuses of the customer's funds based on their ID input Parameter
 func getFundStatusCheck(context *gin.Context) {
 	db := dbConnect()
-	var resultArray = []Dictionary{}
+	var resultArray []Dictionary
 	paramId := context.Param("id")
 	query := fmt.Sprintf("SELECT * FROM investment_output WHERE id = %s;", paramId)
 	var count int
@@ -331,69 +331,77 @@ func getFundStatusCheck(context *gin.Context) {
 
 	// Need to work around here for the looping and fetching information
 
-	if getInfo.FutureSecurity < getInfo.SalaryCredited*0.09 {
-		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+	var user investmentOutput
+	for getInfo.Next() {
+		err = getInfo.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	if getInfo.MutualFund < getInfo.SalaryCredited*0.10 {
-		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.FutureSecurity < user.SalaryCredited*0.09 {
+			newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "FutureSecurity", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.Reits < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "Reits", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "Reits", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.MutualFund < user.SalaryCredited*0.10 {
+			newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "MutualFund", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.IndependentShare < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.Reits < user.SalaryCredited*0.05 {
+			newDict := Dictionary{"Fund": "Reits", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "Reits", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.Gold < getInfo.SalaryCredited*0.02 {
-		newDict := Dictionary{"Fund": "Gold", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "Gold", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.IndependentShare < user.SalaryCredited*0.05 {
+			newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "IndepentShare", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.RecurringDep < getInfo.SalaryCredited*0.05 {
-		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.Gold < user.SalaryCredited*0.02 {
+			newDict := Dictionary{"Fund": "Gold", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "Gold", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.HouseGroceries < getInfo.SalaryCredited*0.30 {
-		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
-		newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
-	}
+		if user.RecurringDep < user.SalaryCredited*0.05 {
+			newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "RecurringDeposite", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-	if getInfo.SelfExpenses < getInfo.SalaryCredited*0.30 {
-		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund Low", "Status": "Low"}
-		resultArray = append(resultArray, newDict)
-	} else {
+		if user.HouseGroceries < user.SalaryCredited*0.30 {
+			newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+			newDict := Dictionary{"Fund": "HouseGroceries", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 
-		newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund High", "Status": "High"}
-		resultArray = append(resultArray, newDict)
+		if user.SelfExpenses < user.SalaryCredited*0.30 {
+			newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund Low", "Status": "Low"}
+			resultArray = append(resultArray, newDict)
+		} else {
+
+			newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund High", "Status": "High"}
+			resultArray = append(resultArray, newDict)
+		}
 	}
 
 	defer db.Close()
