@@ -2,13 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -39,26 +37,6 @@ func dbConnect() *sql.DB {
 	}
 
 	return db
-}
-
-var customerOne = []investmentOutput{}
-
-func getSingleCustomerInformationById(id string) (*investmentOutput, error) {
-	idConvert, _ := stringToInt(id)
-	for index, investmentCalculatorId := range customerOne {
-		if investmentCalculatorId.ID == idConvert {
-			return &customerOne[index], nil
-		}
-	}
-	return nil, errors.New("Investment Information not found!")
-}
-
-func stringToInt(stringNumber string) (int, error) {
-	num, err := strconv.Atoi(stringNumber)
-	if err != nil {
-		return 0, err
-	}
-	return num, nil
 }
 
 // Database API Calls
@@ -329,8 +307,6 @@ func getFundStatusCheck(context *gin.Context) {
 
 	defer getInfo.Close()
 
-	// Need to work around here for the looping and fetching information
-
 	var user investmentOutput
 	for getInfo.Next() {
 		err = getInfo.Scan(&user.ID, &user.Year, &user.Month, &user.SalaryCredited, &user.Saving, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.FutureSecurity, &user.HouseGroceries, &user.SelfExpenses, &user.UnspentMoney, &user.UniqueId)
@@ -394,7 +370,7 @@ func getFundStatusCheck(context *gin.Context) {
 			resultArray = append(resultArray, newDict)
 		}
 
-		if user.SelfExpenses < user.SalaryCredited*0.30 {
+		if user.SelfExpenses < user.SalaryCredited*0.20 {
 			newDict := Dictionary{"Fund": "SelfExpenses", "Message": "Fund Low", "Status": "Low"}
 			resultArray = append(resultArray, newDict)
 		} else {
