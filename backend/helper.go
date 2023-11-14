@@ -383,3 +383,44 @@ func getFundStatusCheck(context *gin.Context) {
 	defer db.Close()
 	context.IndentedJSON(http.StatusAccepted, gin.H{"Result": resultArray})
 }
+
+func getTotalInvestmentByCustomer(context *gin.Context) {
+	db := dbConnect()
+
+	paramUniqueId := context.Param("unique_id")
+	query := fmt.Sprintf("SELECT * FROM investment_output WHERE unique_id = %s;", paramUniqueId)
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	errString := fmt.Sprintf("Error: %s", err)
+
+	if strings.Contains(errString, "no rows in result set") {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	query = "SELECT id, year, mutual_funds, reits, independent_share, recurring_deposit, gold, unique_id FROM investment_output WHERE unique_id = ?;"
+	getInfo, err := db.Query(query, paramUniqueId)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	defer getInfo.Close()
+
+	var user investmentOutput
+	var investmentTotal float64
+	investmentTotal = 0
+	for getInfo.Next() {
+
+		err = getInfo.Scan(&user.ID, &user.Year, &user.MutualFund, &user.Reits, &user.IndependentShare, &user.RecurringDep, &user.Gold, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		investmentTotal = investmentTotal + user.MutualFund + user.Reits + user.RecurringDep + user.Gold + user.IndependentShare
+	}
+
+	defer db.Close()
+	context.IndentedJSON(http.StatusOK, gin.H{"Total Investment Amount : ": investmentTotal})
+
+}

@@ -12,6 +12,7 @@ func main() {
 	router.GET("/customer-information-all/:unique_id", getAllInformationViaUniqueId)
 	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
+	router.GET("/get-total-investment/:unique_id", getTotalInvestmentByCustomer)
 
 	// APIs to add
 	// To get the total investment done by the customer
