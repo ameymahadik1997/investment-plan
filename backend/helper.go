@@ -384,6 +384,7 @@ func getFundStatusCheck(context *gin.Context) {
 	context.IndentedJSON(http.StatusAccepted, gin.H{"Result": resultArray})
 }
 
+// Function to get the Total Investment for a customer based on Unique ID
 func getTotalInvestmentByCustomer(context *gin.Context) {
 	db := dbConnect()
 
