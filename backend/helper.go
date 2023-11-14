@@ -423,5 +423,45 @@ func getTotalInvestmentByCustomer(context *gin.Context) {
 
 	defer db.Close()
 	context.IndentedJSON(http.StatusOK, gin.H{"Total Investment Amount : ": investmentTotal})
+}
 
+// Function to get the total overall Salary Credited for the Customer based on the Unique ID
+func getTotalEarnedMoneyByCustomer(context *gin.Context) {
+	db := dbConnect()
+
+	paramUniqueId := context.Param("unique_id")
+	query := fmt.Sprintf("SELECT * FROM investment_output WHERE unique_id = %s;", paramUniqueId)
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	errString := fmt.Sprintf("Error: %s", err)
+
+	if strings.Contains(errString, "no rows in result set") {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	query = "SELECT id, salary_credited, unique_id FROM investment_output WHERE unique_id = ?;"
+	getInfo, err := db.Query(query, paramUniqueId)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	defer getInfo.Close()
+
+	var user investmentOutput
+	var salaryOverallTotal float64
+	salaryOverallTotal = 0
+	for getInfo.Next() {
+
+		err = getInfo.Scan(&user.ID, &user.SalaryCredited, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		salaryOverallTotal = salaryOverallTotal + user.SalaryCredited
+	}
+
+	defer db.Close()
+	context.IndentedJSON(http.StatusOK, gin.H{"Total Overall Salary Credited Amount : ": salaryOverallTotal})
 }

@@ -13,10 +13,10 @@ func main() {
 	router.PATCH("/customer-information-update/:id", updateSingleCustomerInformation)
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
 	router.GET("/get-total-investment/:unique_id", getTotalInvestmentByCustomer)
+	router.GET("/get-total-money-earned/:unique_id", getTotalEarnedMoneyByCustomer)
 
 	// APIs to add
-	// To get the total investment done by the customer
-	// Total Earned money for all the enteries based on Unique Id
+
 	// Total Net Worth (Saving + Investment + Future Security) for the customer Based on Unique Id
 	// Future Security for all the enteries based on Unique Id
 	// Saving/Emergency Fund for all the enteries based on Unique Id
