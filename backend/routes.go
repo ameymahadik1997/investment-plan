@@ -14,10 +14,10 @@ func main() {
 	router.GET("/customer-information-fund-status-check/:id", getFundStatusCheck)
 	router.GET("/get-total-investment/:unique_id", getTotalInvestmentByCustomer)
 	router.GET("/get-total-money-earned/:unique_id", getTotalEarnedMoneyByCustomer)
+	router.GET("/get-total-net-worth/:unique_id", getTotalNetWorthByCustomer)
 
 	// APIs to add
 
-	// Total Net Worth (Saving + Investment + Future Security) for the customer Based on Unique Id
 	// Future Security for all the enteries based on Unique Id
 	// Saving/Emergency Fund for all the enteries based on Unique Id
 	// Investments (Gold, Reits, Shares, Mutual funds) for all the enteries based on Unique Id
