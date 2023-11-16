@@ -19,7 +19,6 @@ func main() {
 
 	// APIs to add
 
-	// Future Security for all the enteries based on Unique Id
 	// Saving/Emergency Fund for all the enteries based on Unique Id
 	// Investments (Gold, Reits, Shares, Mutual funds) for all the enteries based on Unique Id
 	// Status Check for Saving and Investment should be 30% of total Earned money based on Unique Id
