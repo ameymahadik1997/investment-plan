@@ -506,3 +506,44 @@ func getTotalNetWorthByCustomer(context *gin.Context) {
 	defer db.Close()
 	context.IndentedJSON(http.StatusOK, gin.H{"Total Overall Net Worth Amount : ": netWorthOverAll})
 }
+
+// Function to get the Total Future Securities of the Customer via Unique ID
+func getTotalFutureSecuritiesByCustomer(context *gin.Context) {
+	db := dbConnect()
+
+	paramUniqueId := context.Param("unique_id")
+	query := fmt.Sprintf("SELECT * FROM investment_output WHERE unique_id = %s;", paramUniqueId)
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	errString := fmt.Sprintf("Error: %s", err)
+
+	if strings.Contains(errString, "no rows in result set") {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	query = "SELECT id, future_security, unique_id FROM investment_output WHERE unique_id = ?;"
+	getInfo, err := db.Query(query, paramUniqueId)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"Message": "Information Not Present"})
+		return
+	}
+
+	defer getInfo.Close()
+
+	var user investmentOutput
+	var futureSecurityOverall float64
+	futureSecurityOverall = 0
+	for getInfo.Next() {
+
+		err = getInfo.Scan(&user.ID, &user.FutureSecurity, &user.UniqueId)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		futureSecurityOverall = futureSecurityOverall + user.FutureSecurity
+	}
+
+	defer db.Close()
+	context.IndentedJSON(http.StatusOK, gin.H{"Total Overall Net Worth Amount : ": futureSecurityOverall})
+}

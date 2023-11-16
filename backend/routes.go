@@ -15,6 +15,7 @@ func main() {
 	router.GET("/get-total-investment/:unique_id", getTotalInvestmentByCustomer)
 	router.GET("/get-total-money-earned/:unique_id", getTotalEarnedMoneyByCustomer)
 	router.GET("/get-total-net-worth/:unique_id", getTotalNetWorthByCustomer)
+	router.GET("/get-total-future-securities/:unique_id", getTotalFutureSecuritiesByCustomer)
 
 	// APIs to add
 
