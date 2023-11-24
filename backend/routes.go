@@ -26,6 +26,8 @@ func main() {
 	// Add an API to get the current percentage for the customer based on Unique ID
 	// Add an API to add the new percentage allocation for the customer
 	// Add an assertion for the max or min limit for any of the specific fund allocation percentage
+	// Add a struct and database table that gets created on new creation of user data with default percent values
+	// Add api to edit or update this default values that generates funds based on salary credited.
 
 	// Router localhost and port
 	router.Run("localhost:9090")
